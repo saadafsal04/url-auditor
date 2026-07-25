@@ -13,19 +13,19 @@ https://url-auditor-opal.vercel.app/
 
 2. **Create a virtual environment and activate it:**
 
-python -m venv venv
+    python -m venv venv
 
-source venv/Scripts/activate
+    source venv/Scripts/activate
 
 
 3. **Install dependancies:**
 
-pip install -r requirements.txt
+    pip install -r requirements.txt
 
 
 4. **Run the backend server:**
 
-uvicorn api.main:app --reload
+    uvicorn api.main:app --reload
 
 
 5. **Boot the frontend**
@@ -33,11 +33,11 @@ uvicorn api.main:app --reload
 ## API Contract
 **Endpoint:** 
 
-GET /api/audit?url={target_url}
+    GET /api/audit?url={target_url}
 
 **Example:**
 
-/api/audit?url=https://www.example.com
+    /api/audit?url=https://www.example.com
 
 **On success (200 OK)**
 
@@ -50,7 +50,8 @@ GET /api/audit?url={target_url}
     "h1_count":1,
     "images_missing_alt":0,
     "word_count":18
-}```
+}
+```
 
 **Error Response (400 Bad Request)**
 
