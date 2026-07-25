@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>URL Auditor</title>
+
+        <!-- Importing TailWindCSS-->
+        <script src="https://cdn.tailwindcss.com"></script>
+    </head>
+    <body class="bg-gray-100 min-h-screen flex items-center justify-center p-4">
+
+    <!-- Importing TailWindCSS-->
+    <div class="bg-white p-8 rounded-xl shadow-lg max-w-lg w-full">
+        
+        <h1 class="text-2xl font-bold text-gray-800 mb-2">URL Auditor</h1>
+        <p class="text-gray-500 mb-6 text-sm">Enter a webpage URL</p>
+
+        <!-- Input Form -->
+        <div class="flex flex-col space-y-4">
+            <input 
+                type="url" 
+                id="urlInput" 
+                placeholder="https://example.com" 
+                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                required
+            >
+            <button 
+                id="auditBtn"
+                class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition duration-200"
+            >
+                Audit URL
+            </button>
+        </div>
+
+        <!--  Section for Error Messages -->
+        <div id="errorBox" class="hidden mt-4 p-4 bg-red-100 text-red-700 rounded-lg text-sm"></div>
+
+        <!-- Section for displaying results -->
+        <div id="resultsBox" class="hidden mt-6 space-y-3">
+            <h2 class="font-semibold text-gray-700 border-b pb-2">Results</h2>
+            
+            <div class="grid grid-cols-2 gap-4 text-sm">
+                <div class="bg-gray-50 p-3 rounded border">
+                    <span class="block text-gray-500 text-xs">Status</span>
+                    <span id="resStatus" class="font-bold text-gray-800"></span>
+                </div>
+                <div class="bg-gray-50 p-3 rounded border">
+                    <span class="block text-gray-500 text-xs">Response Time</span>
+                    <span id="resTime" class="font-bold text-gray-800"></span>
+                </div>
+                <div class="bg-gray-50 p-3 rounded border col-span-2">
+                    <span class="block text-gray-500 text-xs">Page Title</span>
+                    <span id="resTitle" class="font-bold text-gray-800"></span>
+                </div>
+                <div class="bg-gray-50 p-3 rounded border col-span-2">
+                    <span class="block text-gray-500 text-xs">Meta Description</span>
+                    <span id="resMeta" class="text-gray-800"></span>
+                </div>
+                <div class="bg-gray-50 p-3 rounded border">
+                    <span class="block text-gray-500 text-xs">H1 Count</span>
+                    <span id="resH1" class="font-bold text-gray-800"></span>
+                </div>
+                <div class="bg-gray-50 p-3 rounded border">
+                    <span class="block text-gray-500 text-xs">Word Count</span>
+                    <span id="resWords" class="font-bold text-gray-800"></span>
+                </div>
+                <div class="bg-gray-50 p-3 rounded border col-span-2">
+                    <span class="block text-gray-500 text-xs">Images Missing Alt Text</span>
+                    <span id="resImages" class="font-bold text-gray-800"></span>
+                </div>
+            </div>
+        </div>
+
+    </div>
+    <div class="mt-8 text-center text-sm text-gray-500 w-full">
+            Built for <a href="https://digitalheroesco.com" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:underline">Digital Heroes Training Task</a>
+    </div>
+    <script>
+        // Grab page elements
+        const auditBtn = document.getElementById('auditBtn');
+        const urlInput = document.getElementById('urlInput');
+        const errorBox = document.getElementById('errorBox');
+        const resultsBox = document.getElementById('resultsBox');
+
+        // Check if button is clicked
+        auditBtn.addEventListener('click', async () => {
+            const url = urlInput.value.trim();
+            if (!url) return;
+
+            // Reset boxes and disable button when processing
+            errorBox.classList.add('hidden');
+            resultsBox.classList.add('hidden');
+            auditBtn.textContent = 'Auditing...';
+            auditBtn.disabled = true;
+            auditBtn.classList.add('opacity-75', 'cursor-not-allowed');
+
+            try {
+                // Call the backend API
+                // encodeURIComponent used to safely encode URL ( relative path implementation works with both vercel and local testing)
+                const response = await fetch(`api/audit?url=${encodeURIComponent(url)}`);
+                const data = await response.json();
+
+                // Check if response is not ok
+                if (!response.ok) {
+                    throw new Error(data.detail || 'An unexpected error occurred');
+                }
+
+                // Populate results
+                document.getElementById('resStatus').textContent = data.status;
+                document.getElementById('resTime').textContent = data.response_time_ms + ' ms';
+                document.getElementById('resTitle').textContent = data.title;
+                document.getElementById('resMeta').textContent = data.meta_description;
+                document.getElementById('resH1').textContent = data.h1_count;
+                document.getElementById('resWords').textContent = data.word_count;
+                document.getElementById('resImages').textContent = data.images_missing_alt;
+
+                // Show the results box
+                resultsBox.classList.remove('hidden');
+
+            } catch (error) {
+                // if error occurs, show message
+                errorBox.textContent = error.message;
+                errorBox.classList.remove('hidden');
+            } finally {
+                // reset button state regardless of success or failure
+                auditBtn.textContent = 'Audit URL';
+                auditBtn.disabled = false;
+                auditBtn.classList.remove('opacity-75', 'cursor-not-allowed');
+            }
+        });
+    </script>
+</body>
+</html>
